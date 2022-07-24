@@ -9,6 +9,15 @@ $(function () {
     const formEgvs = $('#form-egvs');
     const spinner = $('#spinner-html').html();
     const templateCanvas = $('#template-canvas').html();
+    const arrows = {
+      'Flat': '&#8594;',
+      'FortyFiveUp': '&#10532;',
+      'singleUp': '&#8593;',
+      'doubleUp': '&#8593;&#8593;',
+      'FortyFiveDown': '&#10533;',
+      'singleDown': '&#8595;',
+      'doubleDown': '&#8595;&#8595;'
+    }
     
     
     $('#dp-start-date').datetimepicker({
@@ -93,19 +102,23 @@ $(function () {
       $.ajax({
         type: "GET",
         url: route('sts', 'latest'),
-        data: {user_id: User.getVuchka()},
+        data: {user_id: User.getDora()},
         cache: false,
       }).done(function (response) {
         
-        var mmolCont = $('.js-latest-mmol');
-        var mgCont = $('.js-latest-mg');
+        const mmolCont = $('.js-latest-mmol');
+        const mgCont = $('.js-latest-mg');
         
         if(response.success) {
-          if (response.data.value) {
-            let localTime = moment.utc(response.data.timestamp, 'YYYY-MM-DDTHH:mm:ssZ').local().format('HH:mm');
-            
-            mmolCont.html(response.data.mmol + ' ' + response.data.trend_symbol + ' ' + localTime);
-            mgCont.html(response.data.value + ' ' + response.data.trend_symbol + ' ' + localTime);
+          const sgvData = response.data[0] || {};
+
+          if (sgvData.sgv) {
+            const localTime = moment.utc(sgvData.dateString, 'YYYY-MM-DDTHH:mm:ssZ').local().format('HH:mm');
+            const mmol = sgvData.sgv / 18;
+            const arrow = arrows[sgvData.direction] || sgvData.direction;
+
+            mmolCont.html(mmol.toFixed(1) + ' ' + arrow + ' ' + localTime);
+            mgCont.html(sgvData.sgv + ' ' + arrow + ' ' + localTime);
           } else {
             mmolCont.html('No Results');
             mgCont.html('No Results');
@@ -258,5 +271,4 @@ $(function () {
         console.log(error);
       });
     }
-    
 });
