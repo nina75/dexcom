@@ -111,7 +111,7 @@ $(function () {
       const $low = $('#sgv-low');
       const $high = $('#sgv-high');
       const $snooze = $('#snoozeAlert');
-      const snoozeVal = dexBotz?.snoozeAlert.val || snooze.val;
+      const snoozeVal = dexBotz?.snoozeAlert?.val || snooze.val;
       const $snoozedTo = $('#snoozed-to');
 
       $low.val(dexBotz?.low || low);
