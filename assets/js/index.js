@@ -224,7 +224,7 @@ $(function () {
             const arrow = arrows[sgvData.direction] || sgvData.direction;
 
             mmolData = mmol.toFixed(1) + ' ' + arrow + ' ' + localTime;
-            mgData = sgvData.sgv.toFixed(1) + ' ' + arrow + ' ' + localTime;
+            mgData = sgvData.sgv + ' ' + arrow + ' ' + localTime;
 
             document.title = mmolData;
           }
@@ -313,6 +313,10 @@ $(function () {
 
           for (let i = egvs.length - 1; i >= 0; i--) {
             
+            if (!Number.isInteger(egvs[i]['sgv'])) {
+              continue;
+            }
+
             let cDay = moment(egvs[i]['dateString'], dateFormat).format('DD.MM');
             
             if ( dataValue[cDay] ) {
