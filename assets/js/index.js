@@ -4,20 +4,28 @@ $(function () {
       getLatest();
     })();
     
-    
     const uri = route('sts', 'egvs');
     const formEgvs = $('#form-egvs');
     const spinner = $('#spinner-html').html();
     const templateCanvas = $('#template-canvas').html();
+    const low = 4;
+    const high = 10;
+    const dateFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+    const snooze = {
+      val: 0,
+      dateTime: moment().format(dateFormat),
+    };
+    const lsTitle = 'dexBotz';
     const arrows = {
-      'Flat': '&#8594;',
-      'FortyFiveUp': '&#10532;',
-      'singleUp': '&#8593;',
-      'doubleUp': '&#8593;&#8593;',
-      'FortyFiveDown': '&#10533;',
-      'singleDown': '&#8595;',
-      'doubleDown': '&#8595;&#8595;'
-    }
+      'Flat': '\u2192',
+      'FortyFiveUp': '\u279A',
+      'SingleUp': '\u2191',
+      'DoubleUp': '\u21C8',
+      'FortyFiveDown': '\u2798',
+      'SingleDown': '\u2193',
+      'DoubleDown': '\u21CA'
+    };
+    const alarmFrequency = 5;//minutes
     
     
     $('#dp-start-date').datetimepicker({
@@ -95,7 +103,101 @@ $(function () {
       getLatest();
       
     });
+
+    const $modalAlerts = $('#modalSetUpAlerts');
+    $modalAlerts.on('show.bs.modal', function() {
+      const ls = localStorage.getItem(lsTitle);
+      const dexBotz = JSON.parse(ls) || {};
+      const $low = $('#sgv-low');
+      const $high = $('#sgv-high');
+      const $snooze = $('#snoozeAlert');
+      const snoozeVal = dexBotz?.snoozeAlert.val || snooze.val;
+      const $snoozedTo = $('#snoozed-to');
+
+      $low.val(dexBotz?.low || low);
+      $high.val(dexBotz?.high || high);
+      $snooze.val(snoozeVal);
+      $snoozedTo.text('');
+
+      if (snoozeVal > 0 && snoozeVal < 100) {
+        const snoozedTo = moment(dexBotz.snoozeAlert.dateTime, dateFormat).format('HH:mm')
+        $snoozedTo.text('Snoozed to ' + snoozedTo)
+      }
+    });
+
+    $('#btn-save-alerts').on('click', function() {
+      let ls = localStorage.getItem(lsTitle);
+      let dexBotz = JSON.parse(ls) || {};
+      const snoozeVal = $('#snoozeAlert').val() || snooze.val;
+      let dateTime = moment().format(dateFormat);
+
+      if (snoozeVal > 0 && snoozeVal < 100) {
+        const mins = snoozeVal * 60;
+        dateTime = moment().add(mins, 'm').format(dateFormat)
+      }
+
+      dexBotz.low = $('#sgv-low').val() || low;
+      dexBotz.high = $('#sgv-high').val() || high;
+      dexBotz.snoozeAlert = {
+        val: snoozeVal,
+        dateTime: dateTime
+      };
+
+      ls = JSON.stringify(dexBotz);
+      localStorage.setItem(lsTitle, ls);
+    });
+
+    function notifyMe(sgvData = {}) {
+      if (!("Notification" in window)) {
+        alert("This browser does not support desktop notification");
+      } else if (Notification.permission === "granted") {
+        showNotification(sgvData);
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(function (permission) {
+          if (permission === "granted") {
+            showNotification(sgvData);
+          }
+        });
+      }
+    }
+
+    Notification.requestPermission().then(function (permission) {
+      console.log('Notifications: ' + permission);
+    });
     
+    function showNotification(sgvData = {}) {
+      const mmol = sgvData.sgv / 18;
+      let ls = localStorage.getItem(lsTitle);
+      const dexBotz = JSON.parse(ls) || {};
+      const lowAlert = dexBotz?.low || low;
+      const highAlert = dexBotz?.high || high;
+      const snoozeAlert = dexBotz.snoozeAlert || $.extend({}, snooze);
+      const currentTime = moment().format(dateFormat);
+
+      if (snoozeAlert.val > 0) {
+
+        if (snoozeAlert.val > 100 || moment(currentTime, dateFormat).isBefore(snoozeAlert.dateTime)) {
+
+          return;
+        }
+
+        dexBotz.snoozeAlert.val = 0;
+        ls = JSON.stringify(dexBotz);
+        localStorage.setItem(lsTitle, ls);
+      }
+
+      if (mmol < lowAlert || mmol > highAlert) {
+        const title = mmol > highAlert ? 'High alert!' : 'Low alert';
+        const localTime = moment.utc(sgvData.dateString, dateFormat).local().format('HH:mm');
+        const arrow = arrows[sgvData.direction] || sgvData.direction;
+        mmolData = mmol.toFixed(1) + ' ' + arrow + ' ' + localTime;
+        let notification = new Notification(title, {
+          requireInteraction: true,
+          body: mmolData
+        });
+        notification.onclick = function(x) { window.focus(); };
+      }
+    }
     
     function getLatest() {
       
@@ -111,25 +213,29 @@ $(function () {
         
         if(response.success) {
           const sgvData = response.data[0] || {};
+          let mmolData = 'No Data';
+          let mgData = 'No Data';
+
+          setTimeout(getLatest, alarmFrequency * 60000);
 
           if (sgvData.sgv) {
-            const localTime = moment.utc(sgvData.dateString, 'YYYY-MM-DDTHH:mm:ssZ').local().format('HH:mm');
+            const localTime = moment.utc(sgvData.dateString, dateFormat).local().format('HH:mm');
             const mmol = sgvData.sgv / 18;
             const arrow = arrows[sgvData.direction] || sgvData.direction;
 
-            mmolCont.html(mmol.toFixed(1) + ' ' + arrow + ' ' + localTime);
-            mgCont.html(sgvData.sgv + ' ' + arrow + ' ' + localTime);
-          } else {
-            mmolCont.html('No Results');
-            mgCont.html('No Results');
+            mmolData = mmol.toFixed(1) + ' ' + arrow + ' ' + localTime;
+            mgData = sgvData.sgv.toFixed(1) + ' ' + arrow + ' ' + localTime;
+
+            document.title = mmolData;
           }
+
+          mmolCont.html(mmolData);
+          mgCont.html(mgData);
+
+          notifyMe(sgvData);
         }
-        
-        
       });
-      
     }
-    
     
     function getEgvs(url, data) {
 
@@ -201,20 +307,20 @@ $(function () {
 
         if(response.success) {
 
-          const egvs = response.data.egvs;
+          const egvs = response.data;
           let average = 0;
           let dataValue = {};
 
           for (let i = egvs.length - 1; i >= 0; i--) {
             
-            let cDay = moment(egvs[i]['displayTime'], 'YYYY-MM-DD\THH:mm:ss', true).format('DD.MM');
+            let cDay = moment(egvs[i]['dateString'], dateFormat).format('DD.MM');
             
             if ( dataValue[cDay] ) {
-              dataValue[cDay]['value'] += egvs[i]['value'];
+              dataValue[cDay]['sgv'] += egvs[i]['sgv'];
               dataValue[cDay]['len']++;
             } else {
               dataValue[cDay] = {};
-              dataValue[cDay]['value'] = egvs[i]['value'];
+              dataValue[cDay]['sgv'] = egvs[i]['sgv'];
               dataValue[cDay]['len'] = 1;
               
               chartConfig.data.labels.push(cDay);
@@ -226,7 +332,7 @@ $(function () {
               mgDatasets.low.data.push(50);
             }
             
-            average += egvs[i]['value'];
+            average += egvs[i]['sgv'];
           }
           
           
@@ -234,7 +340,7 @@ $(function () {
           
           
           chartConfig.data.labels.forEach(function(label) {
-            let mg = dataValue[label]['value']/dataValue[label]['len'];
+            let mg = dataValue[label]['sgv']/dataValue[label]['len'];
             
             datasets.egvs.data.push( Number.parseFloat(mg/18).toFixed(1) );
             mgDatasets.egvs.data.push( Math.round(mg) );

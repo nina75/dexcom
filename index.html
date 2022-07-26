@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./node_modules/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="./node_modules/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css" />
     <link rel="stylesheet" href="./assets/css/index.css" />
+    <title>DexBotz</title>
   </head>
   <body>
     
@@ -18,6 +19,9 @@
           
           <div class="card unit-container">
             <div class="card-body">
+              <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#modalSetUpAlerts">
+                Alerts
+              </button>
               <div class="btn-group btn-group-sm pull-right" role="group" aria-label="Basic example">
                 <button type="button" class="btn btn-success js-btn-units" data-unit="mmol" >mmol/L</button>
                 <button type="button" class="btn js-btn-units" data-unit="mg">mg/dL</button>
@@ -28,7 +32,7 @@
           <div class="card latest">
             <div class="card-body">
                   
-              <span id="btn-reload-latest"><i class="fa fa-repeat"></i></span>
+              <span id="btn-reload-latest" class="btn btn-sm btn-primary"><i class="fa fa-repeat"></i></span>
                   
               <div class="units">
                 <p class="p-4 text-center display-4 js-latest-mmol"><i class="fa fa-spinner fa-spin"></i></p>
@@ -110,7 +114,47 @@
       <!--row-->
     </div>
     <!--container-->
-    
+    <div class="modal fade" id="modalSetUpAlerts" tabindex="-1" role="dialog" aria-labelledby="modalSetUpAlertsLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalSetUpAlertsLabel">Alerts</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="sgv-low">Low</label>
+              <small class="form-text text-muted">Lower than</small>
+              <input type="number" class="form-control" id="sgv-low" min="2">
+            </div>
+            <div class="form-group">
+              <label for="sgv-high">High</label>
+              <small class="form-text text-muted">Higher than</small>
+              <input type="number" class="form-control" id="sgv-high" min="2">
+            </div>
+            <div class="form-group">
+              <label for="snoozeAlert">Snooze alerts</label>
+              <select class="form-control" id="snoozeAlert">
+                <option value="0"></option>
+                <option value="0.5">30 minutes</option>
+                <option value="1">1 hour</option>
+                <option value="2">2 hours</option>
+                <option value="3">3 hours</option>
+                <option value="5">5 hours</option>
+                <option value="111">Until re-enable</option>
+              </select>
+              <small id="snoozed-to" class="form-text text-muted"></small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" id="btn-save-alerts" class="btn btn-success" data-dismiss="modal">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <template id="spinner-html">
       <i class="fa fa-spinner fa-spin"></i>
     </template>
