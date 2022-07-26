@@ -23,7 +23,8 @@ $(function () {
       'DoubleUp': '\u21C8',
       'FortyFiveDown': '\u2798',
       'SingleDown': '\u2193',
-      'DoubleDown': '\u21CA'
+      'DoubleDown': '\u21CA',
+      'NOT COMPUTABLE': ' '
     };
     const alarmFrequency = 5;//minutes
     
