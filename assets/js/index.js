@@ -237,6 +237,11 @@ $(function () {
             mgData = sgvData.sgv + ' ' + arrow + ' ' + localTime;
 
             document.title = mmolData;
+          } else {
+            const templateAlert = $('#template-alert').html();
+            const content = JSON.stringify(sgvData, undefined, 2);
+
+            $('.unit-container').after(templateAlert.replace('#content#', content));
           }
 
           mmolCont.html(mmolData);
@@ -320,10 +325,13 @@ $(function () {
           const egvs = response.data;
           let average = 0;
           let dataValue = {};
+          let differntDataType = [];
 
           for (let i = egvs.length - 1; i >= 0; i--) {
             
             if (!Number.isInteger(egvs[i]['sgv'])) {
+              differntDataType.push(egvs[i]);
+              
               continue;
             }
 
@@ -352,7 +360,6 @@ $(function () {
           
           let mgChartConfig = $.extend(true, {}, chartConfig);
           
-          
           chartConfig.data.labels.forEach(function(label) {
             let mg = dataValue[label]['sgv']/dataValue[label]['len'];
             
@@ -374,17 +381,21 @@ $(function () {
           
           $('.js-btn-fetch-egvs', formEgvs).html('Fetch');
           
-          
           $('.js-chart-container-mmol').html( templateCanvas.replace('#canvasId#', 'mmolChart') );
           $('.js-chart-container-mg').html( templateCanvas.replace('#canvasId#', 'mgChart') );
-          
           
           const mmolChart = document.getElementById('mmolChart').getContext('2d');
           const mgChart = document.getElementById('mgChart').getContext('2d');
           
-          
           const chart = new Chart(mmolChart, chartConfig);
           const mgLChart = new Chart(mgChart, mgChartConfig);
+
+          if (differntDataType.length) {
+            const templateAlert = $('#template-alert').html();
+            const content = JSON.stringify(differntDataType, undefined, 2);
+
+            $('.latest').after(templateAlert.replace('#content#', content));
+          }
           
         }
       }).fail(function (error) {
