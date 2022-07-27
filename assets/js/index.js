@@ -174,6 +174,17 @@ $(function () {
         }
       });
     }
+
+    function downloadObjectAsJson(exportObj = [], exportName = ''){
+      const fileName = exportName || 'different_data_type_' + moment().format('DD_MM_YYYYTHH_mm');
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href",     dataStr);
+      downloadAnchorNode.setAttribute("download", fileName + ".json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }
     
     function showNotification(sgvData = {}) {
       const mmol = sgvData.sgv / 18;
@@ -242,6 +253,10 @@ $(function () {
             const content = JSON.stringify(sgvData, undefined, 2);
 
             $('.unit-container').after(templateAlert.replace('#content#', content));
+
+            $('#btn-download-different-type').on('click', function() {
+              downloadObjectAsJson(sgvData);
+            });
           }
 
           mmolCont.html(mmolData);
@@ -331,7 +346,6 @@ $(function () {
             
             if (!Number.isInteger(egvs[i]['sgv'])) {
               differntDataType.push(egvs[i]);
-              
               continue;
             }
 
@@ -395,6 +409,10 @@ $(function () {
             const content = JSON.stringify(differntDataType, undefined, 2);
 
             $('.latest').after(templateAlert.replace('#content#', content));
+
+            $('#btn-download-different-type').on('click', function() {
+              downloadObjectAsJson(differntDataType);
+            });
           }
           
         }
