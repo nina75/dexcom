@@ -162,19 +162,6 @@ $(function () {
       }
     }
 
-    //Ask for notifications permission
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification");
-    } else if (Notification.permission === "granted") {
-      console.log('Notifications granted');
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(function (permission) {
-        if (permission === "granted") {
-          console.log('Notifications granted');
-        }
-      });
-    }
-
     function downloadObjectAsJson(exportObj = [], exportName = ''){
       const fileName = exportName || 'different_data_type_' + moment().format('DD_MM_YYYYTHH_mm');
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
@@ -261,8 +248,6 @@ $(function () {
 
           mmolCont.html(mmolData);
           mgCont.html(mgData);
-
-          notifyMe(sgvData);
         }
       });
     }
