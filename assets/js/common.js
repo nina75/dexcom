@@ -1,16 +1,12 @@
-function route(originKey, pathKey) {
+function route(originKey) {
   
   const routes = {
     origin: {
-      sts: 'https://summertime-sadness.herokuapp.com'
-    },
-    path: {
-      egvs: '/api/dexcom/egvs',
-      latest: '/api/sugarmate/latest'
+      sts: 'https://script.google.com/macros/s/AKfycbzJ2v5KJsqNvi8WJioHWs9lOUAtxZBJlUq9Od7lxl1O9mpE-WirC1A8jzBRTX5kQpqQ/exec'
     }
   };
   
-  return routes.origin[originKey] + routes.path[pathKey];
+  return routes.origin[originKey];
 }
 
 var User = (function() {

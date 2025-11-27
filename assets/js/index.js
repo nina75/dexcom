@@ -4,7 +4,7 @@ $(function () {
       getLatest();
     })();
     
-    const uri = route('sts', 'egvs');
+    const uri = route();
     const formEgvs = $('#form-egvs');
     const spinner = $('#spinner-html').html();
     const templateCanvas = $('#template-canvas').html();
@@ -70,7 +70,7 @@ $(function () {
       let endDate = moment( $('[name=endDate]', formEgvs).val(), 'DD.MM.YYYY HH:mm:ss', true ).format('YYYY-MM-DD\TH:m:s');
       let utcEndDate = moment(endDate, 'YYYY-MM-DD\THH:mm:ss').utc().format('YYYY-MM-DD\THH:mm:ss');
       
-      getEgvs( uri, {startDate: utcStartDate, endDate: utcEndDate, user_id: User.getDora()} );
+      getEgvs( uri, {startDate: utcStartDate, endDate: utcEndDate, egvs: 1} );
 
     });
     
@@ -148,20 +148,6 @@ $(function () {
       localStorage.setItem(lsTitle, ls);
     });
 
-    function notifyMe(sgvData = {}) {
-      if (!("Notification" in window)) {
-        alert("This browser does not support desktop notification");
-      } else if (Notification.permission === "granted") {
-        showNotification(sgvData);
-      } else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then(function (permission) {
-          if (permission === "granted") {
-            showNotification(sgvData);
-          }
-        });
-      }
-    }
-
     function downloadObjectAsJson(exportObj = [], exportName = ''){
       const fileName = exportName || 'different_data_type_' + moment().format('DD_MM_YYYYTHH_mm');
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
@@ -173,46 +159,11 @@ $(function () {
       downloadAnchorNode.remove();
     }
     
-    function showNotification(sgvData = {}) {
-      const mmol = sgvData.sgv / 18;
-      let ls = localStorage.getItem(lsTitle);
-      const dexBotz = JSON.parse(ls) || {};
-      const lowAlert = dexBotz?.low || low;
-      const highAlert = dexBotz?.high || high;
-      const snoozeAlert = dexBotz.snoozeAlert || $.extend({}, snooze);
-      const currentTime = moment().format(dateFormat);
-
-      if (snoozeAlert.val > 0) {
-
-        if (snoozeAlert.val > 100 || moment(currentTime, dateFormat).isBefore(snoozeAlert.dateTime)) {
-
-          return;
-        }
-
-        dexBotz.snoozeAlert.val = 0;
-        ls = JSON.stringify(dexBotz);
-        localStorage.setItem(lsTitle, ls);
-      }
-
-      if (mmol < lowAlert || mmol > highAlert) {
-        const title = mmol > highAlert ? 'High alert!' : 'Low alert';
-        const localTime = moment.utc(sgvData.dateString, dateFormat).local().format('HH:mm');
-        const arrow = arrows[sgvData.direction] || sgvData.direction;
-        mmolData = mmol.toFixed(1) + ' ' + arrow + ' ' + localTime;
-        let notification = new Notification(title, {
-          requireInteraction: true,
-          body: mmolData
-        });
-        notification.onclick = function(x) { window.focus(); };
-      }
-    }
-    
     function getLatest() {
       
       $.ajax({
         type: "GET",
-        url: "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjaUc2ysrqZUHZNmdjxYXO4ALtluTAGsKt3_m6ZqKrBYsgc82u_aoHFQvqMSyq7rxOzKQuI7pwETkgpPM-x7pcMNGkk7uuVZZz4hOEpTtT6bI0YKjoS6JT3a63Nc1O7sXftCKmSneGH4Ww4THVSNe1ZSx__nnD9B8fsniGAflWpQ5eUNZjypPDGQRGNpfu7Mb9W4V_YunkDwpTa6rCsegwqN5hRNkIYZKSRuCJIxdmcOQzlF9v_gJ4qcnkBFDEgLAnLnQESwoyadilgX0aNHt_LQXQ-uw&lib=M5JlHn647vaOsCA1w8wj9mE-_7EGZWvvr",
-        data: {user_id: User.getDora()},
+        url: uri,
         cache: false,
       }).done(function (response) {
         
