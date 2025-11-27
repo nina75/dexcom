@@ -1,10 +1,10 @@
 $(function () {
+    const uri = route();
     
     (function() {
       getLatest();
     })();
-    
-    const uri = route();
+
     const formEgvs = $('#form-egvs');
     const spinner = $('#spinner-html').html();
     const templateCanvas = $('#template-canvas').html();
