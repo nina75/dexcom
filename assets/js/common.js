@@ -1,12 +1,5 @@
-function route(originKey) {
-  
-  const routes = {
-    origin: {
-      sts: 'https://script.google.com/macros/s/AKfycbzJ2v5KJsqNvi8WJioHWs9lOUAtxZBJlUq9Od7lxl1O9mpE-WirC1A8jzBRTX5kQpqQ/exec'
-    }
-  };
-  
-  return routes.origin[originKey];
+function route() {
+  return 'https://script.google.com/macros/s/AKfycbzJ2v5KJsqNvi8WJioHWs9lOUAtxZBJlUq9Od7lxl1O9mpE-WirC1A8jzBRTX5kQpqQ/exec';
 }
 
 var User = (function() {
