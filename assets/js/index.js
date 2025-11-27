@@ -211,7 +211,7 @@ $(function () {
       
       $.ajax({
         type: "GET",
-        url: route('sts', 'latest'),
+        url: "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjaUc2ysrqZUHZNmdjxYXO4ALtluTAGsKt3_m6ZqKrBYsgc82u_aoHFQvqMSyq7rxOzKQuI7pwETkgpPM-x7pcMNGkk7uuVZZz4hOEpTtT6bI0YKjoS6JT3a63Nc1O7sXftCKmSneGH4Ww4THVSNe1ZSx__nnD9B8fsniGAflWpQ5eUNZjypPDGQRGNpfu7Mb9W4V_YunkDwpTa6rCsegwqN5hRNkIYZKSRuCJIxdmcOQzlF9v_gJ4qcnkBFDEgLAnLnQESwoyadilgX0aNHt_LQXQ-uw&lib=M5JlHn647vaOsCA1w8wj9mE-_7EGZWvvr",
         data: {user_id: User.getDora()},
         cache: false,
       }).done(function (response) {
